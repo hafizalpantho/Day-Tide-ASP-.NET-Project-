@@ -1,0 +1,69 @@
+﻿@model IEnumerable<DayTide.Models.Admin>
+
+@{
+    ViewBag.Title = "AdminHome";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+   
+    var data1 = ViewBag.userCount;
+}
+
+<h2>AdminHome</h2>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Pie Charts</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.bundle.min.js"></script>
+    <script>
+
+        var PieChartData =
+        {
+            labels: ["Admin", "Moderator", "DeleveryMan", "Customer", "Blocked", "Pending_Sign_Up(Delevery Man)"],
+            datasets: [{
+            label: 'User Detail Chart',
+            backgroundColor: [
+                "#f990a7",
+                "#aad2ed",
+                "#9966FF",
+                "#99e5e5",
+                "#f7bd83",
+            ],
+            borderWidth: 2,
+                data: [@ViewBag.adminCount, @ViewBag.ModeratorCount, @ViewBag.DelmanCount-@ViewBag.Pensign, @ViewBag.cusCount, @ViewBag.BlkUserCount,@ViewBag.Pensign]
+            }]
+    };
+
+    window.onload = function () {
+        var ctx1 = document.getElementById("Piecanvas").getContext("2d");
+        window.myBar = new Chart(ctx1,
+            {
+                type: 'pie',
+                data: PieChartData,
+                options:
+                {
+                    title:
+                    {
+                        display: true,
+                        text: "User Lists"
+                    },
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+    }
+    </script>
+</head>
+<body>
+    <div style="text-align: center">
+        <canvas id="Piecanvas"></canvas>
+    </div>
+    <div style="text-align: center">
+        
+    </div>
+</body>
+
+</html>
+
+
+

@@ -1,0 +1,316 @@
+﻿@model IEnumerable<DayTide.Models.Cart>
+@{
+    ViewBag.Title = "Check Out";
+    Layout = "~/Views/Shared/_site.cshtml";
+
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css" integrity="sha512-C7hOmCgGzihKXzyPU/z4nv97W0d9bv4ALuuEbSf6hm93myico9qa0hv4dODThvCsqQUmKmLcJmlpRmCaApr83g==" crossorigin="anonymous" />
+
+@if (TempData["customerIdData"] == null)
+{
+    <h3 style="text-align:center">Nothing in the Cart</h3>
+}
+else
+{
+
+    <table border="1" class="table table-bordered">
+        <tr>
+            @*<th>Customer Name</th>*@
+            <th>Customer ID</th>
+            <th>Product ID</th>
+            <th>Product Name</th>
+            @*<th>Product ID</th>*@
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total Amount</th>
+            <th>Inc.Vat(5%)</th>
+            <th>Picture</th>
+            @*<th>Edit</th>*@
+            <th>Delete</th>
+
+        </tr>
+
+        @*@foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Customer.Name</td>
+                    <td>@item.CustomerId</td>
+                    <td>@item.Product.ProductName</td>
+                    <td>@item.ProductId</td>
+                    <td>@item.Quantiry</td>
+                    <td>@item.Price_unit_</td>
+
+
+                </tr>
+             }*@
+
+
+
+
+
+        @foreach (var item in TempData["testingitem"] as IList<DayTide.Models.CartViewModelDemo>)
+        {
+    <tr>
+        @*<td>@item.Customer.Name</td>*@
+        <td>@item.CustomerId</td>
+        @*<td>@item.Product.ProductName</td>*@
+        <td>@item.ProductId</td>
+        <td>@item.ProductName</td>
+        <td>@item.Quantiry</td>
+        <td>@item.Price_unit_</td>
+        <td>@((item.Quantiry * item.Price_unit_).ToString())</td>
+        <td>@(((item.Quantiry * item.Price_unit_)+ ((item.Quantiry * item.Price_unit_)*0.05)).ToString())</td>
+        <td>
+            <img src="~/Content/Products/@item.Picture" alt="@item.Picture" width="100" height="100">
+        </td>
+        @*<td><a href="/cart/edit/@item.Id">Edit</a></td>*@
+        <td><a href="/cart/delete/@item.Id">Delete</a></td>
+
+
+    </tr>
+
+
+
+        }
+
+
+    </table>
+}
+
+<br />
+
+@*<div style="display:inline-block; height:400px;width:400px">
+    <canvas id="bar-chart-grouped" width="100" height="100"></canvas>
+
+</div>*@
+
+<div style="display: ; height:300px;width:300px;  float:right; margin-top:10px;">
+    @*<canvas id="mixed-chart" width="800" height="450"></canvas>*@
+
+    <canvas id="bar_chart" style=" display:block; height:400px;width:400px;"></canvas>
+</div>
+
+
+<br />
+<h2>Total price: @TempData["totalPrice"]</h2>
+<br />
+@* Start Billing form *@
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 order-md-1">
+            <h4 class="mb-3">Billing address</h4>
+
+            <form class="" action="/checkout/Confirm" method="post" onsubmit="return myff()">
+
+
+
+
+                <input type="hidden" name="Date" value="@DateTime.Now.ToString()" />
+
+
+
+                <input type="hidden" name="CustomerId" value="@Session["userid"].ToString()" />
+
+                @*<div class="mb-3">
+                        <label for="email">Email <span class="text-muted"></span></label>
+                        <input type="email" class="form-control" id="email" placeholder="you@example.com">
+                        <div class="invalid-feedback">
+                            Please enter a valid email address for shipping updates.
+                        </div>
+                    </div>*@
+
+                <div class="mb-3">
+                    <label for="address">Address</label>
+                    <input type="text" name="Address" class="form-control" id="adess">
+                    <div class="" id="errAdess">
+
+                    </div>
+                </div>
+
+
+
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label for="district">District</label>
+                        <select name="District" class="custom-select d-block w-100" id="district">
+                            <option value="" disabled>Choose...</option>
+                            <option value="Dhaka">Dhaka</option>
+                            <option value="Chittagong">Chittagong</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a valid District.
+                        </div>
+                    </div>
+
+
+                </div>
+                <hr class="mb-4">
+
+
+                <hr class="mb-4">
+
+                <h4 class="mb-3">Payment</h4>
+
+
+                <div class="mb-3">
+                    <label for="address">Amount</label>
+                    <input type="text" name="Amount" class="form-control" id="amnt" value="@TempData["totalPrice"]" readonly>
+                    <div class="" id="errAmnt">
+
+                    </div>
+                </div>
+
+
+                <div class="d-block my-3">
+                    <label for="cc-name">Select Card</label>
+                    <select name="Payment_Type" class="custom-select d-block w-100" id="payTy">
+                        <option value="">Choose...</option>
+                        <option value="Visa">Visa</option>
+                        <option value="MasterCard">MasterCard</option>
+                        <option value="AmericanExpress">American Express</option>
+                        <option value="Paypal">PayPal</option>
+                    </select>
+                    <div id="errPay"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="cc-name">Name on card</label>
+                        <input type="text" class="form-control" id="cc-name" placeholder="">
+                        <small class="text-muted">Full name as displayed on card</small>
+                        <div class="" id="errNam">
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="cc-number">Credit card number</label>
+                        <input type="text" class="form-control" id="cc-number" placeholder="">
+                        <div class="" id="errcNum">
+
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                <hr class="mb-4">
+                <button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* End Billing form *@
+<div style="margin-top:10px; margin-bottom:10px;"></div>
+
+
+
+@{
+    var data = TempData["chartPrice"];
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw==" crossorigin="anonymous"></script>
+
+<script>
+            /////////////////////////////chart js my///////////////////////////////
+    ///////////////////////Chart js///////////////////////////
+
+
+    //new Chart(document.getElementById("bar-chart-grouped"), {
+    //    type: 'bar',
+    //    data: {
+    //        labels: ["1900", "1950", "1999", "2050"],//x - axis
+    //        datasets: [
+    //            {
+    //                label: "Africa",
+    //                backgroundColor: "#3e95cd",
+    //                data: [133, 221, 783, 2478] //y - axis
+    //            }, {
+    //                label: "Europe",
+    //                backgroundColor: "#8e5ea2",
+    //                // data: [408, 547, 675, 734] //y - axis
+    //            }
+    //        ]
+    //    },
+    //    options: {
+    //        title: {
+    //            display: true,
+    //            text: 'Population growth (millions)'
+    //        }
+    //    }
+    //});
+
+
+      var randomColor ="#"+  Math.floor(Math.random() * 16777215).toString(16);
+        var arrPrice =  @Html.Raw(Json.Encode(TempData["chartPrice"]));
+
+    //var arrPrice = [100, 500, 489,];
+
+        console.log("price =" +arrPrice);
+
+        var ctx = document.getElementById("bar_chart");
+        var coloR = [];
+
+
+        let con = Object(arrPrice);
+
+
+        var dynamicColors = function () {
+            var r = Math.floor(Math.random() * 255);
+            var g = Math.floor(Math.random() * 255);
+            var b = Math.floor(Math.random() * 255);
+            return "rgb(" + r + "," + g + "," + b + ")";
+        };
+
+        for (var i in con) {
+
+            coloR.push(dynamicColors());
+        }
+
+
+
+
+
+
+
+
+        var barChart = new Chart(ctx, {
+
+            type: "pie",
+            data: {
+                labels: arrPrice, //[100, 300, 600, 900, 2500, 5000, 10000, 15000],
+                datasets: [{
+                    label: "Chart bar label",
+                    data: arrPrice,
+                    backgroundColor: coloR,
+
+
+                }]
+            },
+
+            options: {
+
+
+
+                title:
+                {
+                    display: true,
+                    text: 'Price List demo'
+                }
+            }
+
+
+        });
+
+
+
+
+
+
+
+
+</script>
+
